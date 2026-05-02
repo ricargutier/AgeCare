@@ -29,7 +29,8 @@
     "e2e": "node e2e/smoke.mjs",
     "typecheck": "pnpm -r run typecheck",
     "check-stack": "node scripts/check-stack.mjs",
-    "seed-summary": "node scripts/seed-summary.mjs"
+    "seed-summary": "node scripts/seed-summary.mjs",
+    "seed:history": "node scripts/seed-history.mjs"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
