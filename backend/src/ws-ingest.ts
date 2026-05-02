@@ -5,6 +5,44 @@ import { processIngestFrame } from "./alert-engine.js";
 
 export async function wsIngestRoutes(app: FastifyInstance) {
   app.get("/ws/ingest", { websocket: true }, async (connection, req) => {
+    // Register listeners BEFORE awaits so we don't lose early messages.
+    let device: { id: string; elderId: string; serial: string } | null = null;
+    const pendingFrames: Buffer[] = [];
+
+    const handleFrame = async (raw: Buffer) => {
+      let frame: IngestFrame;
+      try {
+        frame = JSON.parse(raw.toString()) as IngestFrame;
+      } catch {
+        app.log.warn("[ws-ingest] Failed to parse frame");
+        return;
+      }
+      if (frame.deviceId !== device!.id) {
+        app.log.warn(`[ws-ingest] deviceId mismatch: frame=${frame.deviceId} auth=${device!.id}`);
+        return;
+      }
+      try {
+        await processIngestFrame(frame, device!.id, device!.elderId);
+      } catch (err) {
+        app.log.error({ err }, "[ws-ingest] processIngestFrame error");
+      }
+    };
+
+    connection.on("message", async (raw: Buffer) => {
+      if (!device) {
+        pendingFrames.push(raw);
+        return;
+      }
+      await handleFrame(raw);
+    });
+
+    connection.on("close", () => {
+      if (device) {
+        app.log.info(`[ws-ingest] Device ${device.id} disconnected`);
+      }
+    });
+
+    // Now do auth.
     const url = new URL(req.url!, `http://localhost`);
     const deviceToken = url.searchParams.get("deviceToken");
 
@@ -13,7 +51,6 @@ export async function wsIngestRoutes(app: FastifyInstance) {
       return;
     }
 
-    // Authenticate device token
     const tokenRecord = await prisma.deviceToken.findUnique({
       where: { token: deviceToken },
       include: { device: true },
@@ -24,9 +61,8 @@ export async function wsIngestRoutes(app: FastifyInstance) {
       return;
     }
 
-    const device = tokenRecord.device;
+    device = tokenRecord.device;
 
-    // Update lastSeenAt on connect
     await prisma.device.update({
       where: { id: device.id },
       data: { lastSeenAt: new Date() },
@@ -34,30 +70,10 @@ export async function wsIngestRoutes(app: FastifyInstance) {
 
     app.log.info(`[ws-ingest] Device ${device.id} (${device.serial}) connected`);
 
-    connection.on("message", async (raw: Buffer) => {
-      let frame: IngestFrame;
-      try {
-        frame = JSON.parse(raw.toString()) as IngestFrame;
-      } catch {
-        app.log.warn("[ws-ingest] Failed to parse frame");
-        return;
-      }
-
-      // Validate that deviceId in frame matches authenticated device
-      if (frame.deviceId !== device.id) {
-        app.log.warn(`[ws-ingest] deviceId mismatch: frame=${frame.deviceId} auth=${device.id}`);
-        return;
-      }
-
-      try {
-        await processIngestFrame(frame, device.id, device.elderId);
-      } catch (err) {
-        app.log.error({ err }, "[ws-ingest] processIngestFrame error");
-      }
-    });
-
-    connection.on("close", () => {
-      app.log.info(`[ws-ingest] Device ${device.id} disconnected`);
-    });
+    // Drain any frames received during auth.
+    for (const raw of pendingFrames) {
+      await handleFrame(raw);
+    }
+    pendingFrames.length = 0;
   });
 }

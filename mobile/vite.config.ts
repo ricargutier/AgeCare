@@ -86,14 +86,14 @@ export default defineConfig({
   server: {
     port: 5174,
     proxy: {
-      "/auth": "http://localhost:3000",
-      "/elders": "http://localhost:3000",
-      "/alerts": "http://localhost:3000",
-      "/medications": "http://localhost:3000",
-      "/push": "http://localhost:3000",
-      "/audit": "http://localhost:3000",
+      "/auth": "http://localhost:8080",
+      "/elders": "http://localhost:8080",
+      "/alerts": "http://localhost:8080",
+      "/medications": "http://localhost:8080",
+      "/push": "http://localhost:8080",
+      "/audit": "http://localhost:8080",
       "/ws": {
-        target: "ws://localhost:3000",
+        target: "ws://localhost:8080",
         ws: true,
       },
     },

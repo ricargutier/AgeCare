@@ -32,7 +32,8 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "ws": "^8.20.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

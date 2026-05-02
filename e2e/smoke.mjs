@@ -238,6 +238,7 @@ async function step8_acknowledge(alert) {
   try {
     const { status, body } = await apiFetch(`/alerts/${alert.id}/acknowledge`, {
       method: "POST",
+      body: "{}",
     });
     if (status === 200 && (body?.acknowledgedAt || body?.alert?.acknowledgedAt)) {
       step(`POST /alerts/${alert.id}/acknowledge → acknowledgedAt set`, true, Date.now() - t0);
