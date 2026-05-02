@@ -106,6 +106,27 @@ export function Layout() {
                 {roleLabels[user.role]}
               </div>
             </div>
+            <Link
+              to="/settings"
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--primary)",
+                textDecoration: "none",
+                padding: "6px 10px",
+                borderRadius: 8,
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background =
+                  "rgba(45,106,79,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+              }}
+            >
+              Settings
+            </Link>
             <button
               onClick={handleLogout}
               className="btn btn-secondary"

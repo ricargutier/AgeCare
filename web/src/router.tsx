@@ -3,6 +3,8 @@ import { Layout } from "./components/Layout";
 import { Login } from "./pages/Login";
 import { EldersList } from "./pages/EldersList";
 import { ElderDetail } from "./pages/ElderDetail";
+import { AlertDetail } from "./pages/AlertDetail";
+import { Settings } from "./pages/Settings";
 import { MyView } from "./pages/MyView";
 import { AdminPanel } from "./pages/AdminPanel";
 import { useAuthStore } from "./auth/store";
@@ -94,6 +96,14 @@ export const router = createBrowserRouter([
             <AdminPanel />
           </RequireRole>
         ),
+      },
+      {
+        path: "alerts/:id",
+        element: <AlertDetail />,
+      },
+      {
+        path: "settings",
+        element: <Settings />,
       },
     ],
   },

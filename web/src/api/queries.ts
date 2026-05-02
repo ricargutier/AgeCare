@@ -29,6 +29,7 @@ export const queryKeys = {
   elderVitals: (id: string, range: string) => ["elder-vitals", id, range] as const,
   elderAlerts: (id: string, status?: AlertStatus) =>
     status ? ["elder-alerts", id, status] : (["elder-alerts", id] as const),
+  alert: (id: string) => ["alert", id] as const,
   elderMedications: (id: string) => ["elder-medications", id] as const,
   elderDevices: (id: string) => ["elder-devices", id] as const,
   auditLog: ["audit-log"] as const,
@@ -95,6 +96,14 @@ export function useElderAlerts(id: string, status?: AlertStatus) {
   });
 }
 
+export function useAlert(id: string) {
+  return useQuery<Alert>({
+    queryKey: queryKeys.alert(id),
+    queryFn: () => apiClient.get<Alert>(`/alerts/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
 export function useElderMedications(id: string) {
   return useQuery<MedicationSchedule[]>({
     queryKey: queryKeys.elderMedications(id),
@@ -127,9 +136,10 @@ export function useAcknowledgeAlert() {
   return useMutation<Alert, Error, string>({
     mutationFn: (alertId) =>
       apiClient.post<Alert>(`/alerts/${alertId}/acknowledge`),
-    onSuccess: (updated) => {
+    onSuccess: (updated, alertId) => {
       qc.invalidateQueries({ queryKey: queryKeys.elderAlerts(updated.elderId) });
       qc.invalidateQueries({ queryKey: queryKeys.elder(updated.elderId) });
+      qc.setQueryData(queryKeys.alert(alertId), updated);
     },
   });
 }
@@ -139,9 +149,10 @@ export function useResolveAlert() {
   return useMutation<Alert, Error, string>({
     mutationFn: (alertId) =>
       apiClient.post<Alert>(`/alerts/${alertId}/resolve`),
-    onSuccess: (updated) => {
+    onSuccess: (updated, alertId) => {
       qc.invalidateQueries({ queryKey: queryKeys.elderAlerts(updated.elderId) });
       qc.invalidateQueries({ queryKey: queryKeys.elder(updated.elderId) });
+      qc.setQueryData(queryKeys.alert(alertId), updated);
     },
   });
 }
