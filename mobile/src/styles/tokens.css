@@ -1,0 +1,36 @@
+/* Design tokens — ported from index.html :root. Single source of truth for mobile PWA. */
+:root {
+  --primary: #2d6a4f;
+  --primary-light: #40916c;
+  --primary-dark: #1b4332;
+  --accent: #95d5b2;
+  --background: #f8f9fa;
+  --card-bg: #ffffff;
+  --text-primary: #1b4332;
+  --text-secondary: #6c757d;
+  --error: #dc3545;
+  --warn: #fd7e14;
+  --info: #0d6efd;
+  --input-border: #ced4da;
+  --shadow: 0 8px 32px rgba(45, 106, 79, 0.12);
+  --shadow-sm: 0 2px 8px rgba(45, 106, 79, 0.08);
+  --radius: 12px;
+  --radius-lg: 20px;
+  --radius-sm: 8px;
+
+  /* Severity colors */
+  --severity-critical: #dc3545;
+  --severity-critical-bg: #fff5f5;
+  --severity-critical-border: #f5c6cb;
+  --severity-warn: #fd7e14;
+  --severity-warn-bg: #fff8f0;
+  --severity-warn-border: #ffdcb0;
+  --severity-info: #0d6efd;
+  --severity-info-bg: #f0f5ff;
+  --severity-info-border: #b6cfff;
+
+  /* Bottom nav height — used by Layout */
+  --bottom-nav-height: 64px;
+  /* Safe area for iOS notch / home indicator */
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
