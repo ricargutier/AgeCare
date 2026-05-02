@@ -1,0 +1,24 @@
+{
+  "name": "@agecare/simulators",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/heartbeat.ts",
+    "sim:fall": "tsx src/scenarios/fall.ts",
+    "sim:sos": "tsx src/scenarios/sos.ts",
+    "sim:vitals-anomaly": "tsx src/scenarios/vitals-anomaly.ts",
+    "sim:inactivity": "tsx src/scenarios/inactivity.ts",
+    "sim:medication-missed": "tsx src/scenarios/medication-missed.ts",
+    "sim:device-offline": "tsx src/scenarios/device-offline.ts"
+  },
+  "dependencies": {
+    "ws": "^8.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.15.0",
+    "typescript": "^5.4.5"
+  }
+}
