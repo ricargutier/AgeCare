@@ -156,6 +156,16 @@ export interface AuditLog {
 // CONTRACT-CHANGE-REQUEST: actorUserId made nullable to support system-generated
 // audit entries from the alert engine and background workers (Backend Round 2).
 
+export interface VitalsDailySummary {
+  date: string; // ISO date YYYY-MM-DD (UTC)
+  avgHeartRate: number | null;
+  minHeartRate: number | null;
+  maxHeartRate: number | null;
+  avgSpo2: number | null;
+  totalSteps: number | null; // MAX cumulative reading of the day (or sum if additive)
+  sampleCount: number;
+}
+
 export type DemoScenarioName =
   | "fall"
   | "sos"
