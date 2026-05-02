@@ -145,13 +145,24 @@ export interface MedicationEvent {
 
 export interface AuditLog {
   id: string;
-  actorUserId: string;
+  actorUserId: string | null; // null = system-generated (alert engine / background workers)
   action: string; // e.g. "alert.acknowledge"
   targetType: string; // e.g. "alert"
   targetId: string;
   ts: string;
   payload: Record<string, unknown>;
 }
+
+// CONTRACT-CHANGE-REQUEST: actorUserId made nullable to support system-generated
+// audit entries from the alert engine and background workers (Backend Round 2).
+
+export type DemoScenarioName =
+  | "fall"
+  | "sos"
+  | "vitals_anomaly"
+  | "medication_missed"
+  | "inactivity"
+  | "device_offline";
 
 // ─── REST API request/response shapes ──────────────────────────────────────────
 

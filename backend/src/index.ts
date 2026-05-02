@@ -5,6 +5,7 @@ import { alertRoutes } from "./alerts.js";
 import { medicationRoutes } from "./medications.js";
 import { pushRoutes } from "./push.js";
 import { auditRoutes } from "./audit.js";
+import { demoRoutes } from "./demo.js";
 import { wsIngestRoutes } from "./ws-ingest.js";
 import { wsClientRoutes } from "./ws-client.js";
 import { startBackgroundWorkers } from "./alert-engine.js";
@@ -23,6 +24,7 @@ async function main() {
   await app.register(medicationRoutes);
   await app.register(pushRoutes);
   await app.register(auditRoutes);
+  await app.register(demoRoutes);
 
   // ─── WebSocket routes ───────────────────────────────────────────────────────
   await app.register(wsIngestRoutes);

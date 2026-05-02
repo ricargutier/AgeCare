@@ -18,11 +18,13 @@ const lastMotionByElder = new Map<string, number>(); // elderId → timestamp ms
 const lastHeartbeatByDevice = new Map<string, number>(); // deviceId → timestamp ms
 
 // ─── Helper: create alert and broadcast ──────────────────────────────────────
-async function createAlert(params: {
+// Exported so demo/scenarios endpoint can create alerts directly.
+export async function createAlertDirect(params: {
   elderId: string;
   type: string;
   severity: string;
   payload?: Record<string, unknown>;
+  actorUserId?: string | null; // null = system-generated
 }) {
   const alert = await prisma.alert.create({
     data: {
@@ -34,11 +36,36 @@ async function createAlert(params: {
     },
   });
 
+  // Audit log entry for every new alert (actorUserId null = system)
+  await prisma.auditLog.create({
+    data: {
+      actorUserId: params.actorUserId ?? null,
+      action: "alert.create",
+      targetType: "alert",
+      targetId: alert.id,
+      payload: {
+        type: params.type,
+        severity: params.severity,
+        elderId: params.elderId,
+      },
+    },
+  });
+
   const serialized = serializeAlert(alert);
   broadcastAlertNew(serialized);
   await sendPushToElderSubscribers(params.elderId, { type: "alert.new", data: serialized });
 
   return serialized;
+}
+
+// Internal alias for background workers (system actor)
+async function createAlert(params: {
+  elderId: string;
+  type: string;
+  severity: string;
+  payload?: Record<string, unknown>;
+}) {
+  return createAlertDirect({ ...params, actorUserId: null });
 }
 
 // ─── Main ingest dispatcher ──────────────────────────────────────────────────

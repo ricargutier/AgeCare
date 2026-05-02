@@ -37,6 +37,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# Claude Code worktree/agent state
+.claude/
+
 # TypeScript
 *.tsbuildinfo
 

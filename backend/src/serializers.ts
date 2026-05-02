@@ -102,7 +102,7 @@ type PrismaMedEvent = {
 
 type PrismaAuditLog = {
   id: string;
-  actorUserId: string;
+  actorUserId: string | null;
   action: string;
   targetType: string;
   targetId: string;

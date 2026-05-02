@@ -135,14 +135,14 @@ model MedicationEvent {
 
 model AuditLog {
   id          String   @id @default(uuid())
-  actorUserId String
+  actorUserId String?  // null = system-generated (alert engine, background workers)
   action      String
   targetType  String
   targetId    String
   ts          DateTime @default(now())
   payload     Json     @default("{}")
 
-  actor User @relation(fields: [actorUserId], references: [id])
+  actor User? @relation(fields: [actorUserId], references: [id])
 }
 
 model PushSubscription {

@@ -1,21 +1,16 @@
 /**
  * Service Worker push/notificationclick handlers.
  *
- * This file is referenced from vite.config.ts via vite-plugin-pwa's
- * `additionalManifestEntries`. In practice, with the `generateSW` strategy the
- * workbox-generated SW is the active service worker, so we inject these
- * handlers via the workbox `injectManifest` approach or simply import this
- * module from a custom SW. For the prototype we register these listeners
- * directly in the main SW via the PWA plugin's self.__WB_MANIFEST injection.
- *
- * NOTE: This file is imported at the TOP of the custom service worker if you
- * switch to `injectManifest` strategy. For now the event listeners below are
- * bundled via the plugin's includeAssets.
+ * This file is compiled under tsconfig.sw.json (lib: WebWorker, ES2020) and
+ * imported from src/sw.ts — the custom service worker entry used by
+ * vite-plugin-pwa's `injectManifest` strategy.
  */
 
-declare const self: ServiceWorkerGlobalScope;
+// `self` is already declared by the WebWorker lib as WorkerGlobalScope; cast to
+// ServiceWorkerGlobalScope here so we get access to push/notificationclick types.
+const sw = self as unknown as ServiceWorkerGlobalScope;
 
-self.addEventListener("push", (event: PushEvent) => {
+sw.addEventListener("push", (event: PushEvent) => {
   if (!event.data) return;
 
   let payload: {
@@ -38,7 +33,8 @@ self.addEventListener("push", (event: PushEvent) => {
     payload.body ??
     `${payload.alertType ?? "Alert"} (${payload.severity ?? "info"})`;
 
-  const options: NotificationOptions = {
+  // renotify and vibrate are valid in browsers but not in TS lib types for NotificationOptions.
+  const options = {
     body,
     icon: "/icon-192.png",
     badge: "/icon-192.png",
@@ -46,22 +42,20 @@ self.addEventListener("push", (event: PushEvent) => {
     renotify: true,
     requireInteraction: payload.severity === "critical",
     data: { alertId: payload.alertId },
-    // vibrate is valid in browsers but not in TS lib types for NotificationOptions
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...(payload.severity === "critical" ? { vibrate: [200, 100, 200] } as any : {}),
-  };
+    vibrate: payload.severity === "critical" ? [200, 100, 200] : undefined,
+  } as NotificationOptions;
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(sw.registration.showNotification(title, options));
 });
 
-self.addEventListener("notificationclick", (event: NotificationEvent) => {
+sw.addEventListener("notificationclick", (event: NotificationEvent) => {
   event.notification.close();
 
   const alertId = (event.notification.data as { alertId?: string }).alertId;
   const url = alertId ? `/alerts/${alertId}` : "/alerts";
 
   event.waitUntil(
-    self.clients
+    sw.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
         // Focus existing PWA window if open
@@ -73,7 +67,7 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
           }
         }
         // Otherwise open a new window
-        return self.clients.openWindow(url);
+        return sw.clients.openWindow(url);
       })
   );
 });

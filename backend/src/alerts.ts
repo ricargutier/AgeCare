@@ -77,7 +77,8 @@ export async function alertRoutes(app: FastifyInstance) {
   );
 
   // POST /alerts/:id/resolve
-  app.post<{ Params: { id: string } }>(
+  // Body: {} or { note?: string }
+  app.post<{ Params: { id: string }; Body: { note?: string } | undefined }>(
     "/alerts/:id/resolve",
     { preHandler: requireAuth() },
     async (req, reply) => {
@@ -87,6 +88,9 @@ export async function alertRoutes(app: FastifyInstance) {
       if (jwt.role === "family_viewer") {
         return reply.status(403).send({ error: { code: "FORBIDDEN", message: "Viewers cannot resolve alerts" } });
       }
+
+      // elder can only resolve their own alert (enforced via canAccessAlert)
+      // family_admin, caregiver, system_admin also allowed (family_viewer blocked above)
 
       const { alert, allowed } = await canAccessAlert(jwt.id, jwt.role, req.params.id);
       if (!alert) {
@@ -109,14 +113,15 @@ export async function alertRoutes(app: FastifyInstance) {
         },
       });
 
-      // Audit log
+      // Audit log — include optional note in payload
+      const note = req.body?.note ?? undefined;
       await prisma.auditLog.create({
         data: {
           actorUserId: jwt.id,
           action: "alert.resolve",
           targetType: "alert",
           targetId: alert.id,
-          payload: {},
+          payload: note !== undefined ? { note } : {},
         },
       });
 
