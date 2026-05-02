@@ -24,6 +24,23 @@ async function canAccessAlert(userId: string, role: Role, alertId: string) {
 }
 
 export async function alertRoutes(app: FastifyInstance) {
+  // GET /alerts/:id — fetch a single alert (used by the web alert detail page)
+  app.get<{ Params: { id: string } }>(
+    "/alerts/:id",
+    { preHandler: requireAuth() },
+    async (req, reply) => {
+      const jwt = req.user as { id: string; role: Role };
+      const { alert, allowed } = await canAccessAlert(jwt.id, jwt.role, req.params.id);
+      if (!alert) {
+        return reply.status(404).send({ error: { code: "NOT_FOUND", message: "Alert not found" } });
+      }
+      if (!allowed) {
+        return reply.status(403).send({ error: { code: "FORBIDDEN", message: "Not in this elder's care circle" } });
+      }
+      return serializeAlert(alert);
+    }
+  );
+
   // POST /alerts/:id/acknowledge
   app.post<{ Params: { id: string } }>(
     "/alerts/:id/acknowledge",
