@@ -1,0 +1,27 @@
+/* Design tokens — ported exactly from c:\code\AgeCare\AgeCare\AgeCare\index.html :root block */
+:root {
+  --primary: #2D6A4F;
+  --primary-light: #40916C;
+  --primary-dark: #1B4332;
+  --accent: #95D5B2;
+  --background: #F8F9FA;
+  --card-bg: #FFFFFF;
+  --text-primary: #1B4332;
+  --text-secondary: #6C757D;
+  --error: #DC3545;
+  --input-border: #CED4DA;
+  --shadow: 0 8px 32px rgba(45, 106, 79, 0.12);
+
+  /* Additional semantic tokens for the app shell */
+  --nav-height: 60px;
+  --sidebar-width: 240px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+}
