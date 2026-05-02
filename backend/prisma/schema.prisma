@@ -1,0 +1,160 @@
+// AgeCare Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         String   // Role: elder | family_admin | family_viewer | caregiver | healthcare_provider | system_admin
+  displayName  String
+  phone        String?
+  createdAt    DateTime @default(now())
+
+  elder             Elder?
+  careCircleLinks   CareCircleMember[]
+  auditLogs         AuditLog[]
+  pushSubscriptions PushSubscription[]
+}
+
+model Elder {
+  id                String @id @default(uuid())
+  userId            String @unique
+  dob               DateTime
+  conditions        String[]
+  emergencyContacts Json   // EmergencyContact[]
+
+  user                User               @relation(fields: [userId], references: [id])
+  careCircle          CareCircleMember[]
+  devices             Device[]
+  vitalsSamples       VitalsSample[]
+  alerts              Alert[]
+  medicationSchedules MedicationSchedule[]
+}
+
+model CareCircleMember {
+  id              String @id @default(uuid())
+  elderId         String // references Elder.id
+  userId          String // references User.id (non-elder user)
+  relationship    String // CareRelationship
+  permissionLevel String // CarePermissionLevel: admin | viewer | caregiver | provider
+
+  elder Elder @relation(fields: [elderId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([elderId, userId])
+}
+
+model Device {
+  id         String    @id @default(uuid())
+  elderId    String
+  type       String    // DeviceType
+  serial     String    @unique
+  lastSeenAt DateTime?
+  batteryPct Float?
+
+  elder         Elder          @relation(fields: [elderId], references: [id])
+  vitalsSamples VitalsSample[]
+  deviceTokens  DeviceToken[]
+}
+
+model DeviceToken {
+  id        String   @id @default(uuid())
+  deviceId  String
+  token     String   @unique
+  createdAt DateTime @default(now())
+
+  device Device @relation(fields: [deviceId], references: [id])
+}
+
+model VitalsSample {
+  id         String   @id @default(uuid())
+  elderId    String
+  deviceId   String
+  ts         DateTime
+  heartRate  Float?
+  spo2       Float?
+  steps      Float?
+  batteryPct Float?
+
+  elder  Elder  @relation(fields: [elderId], references: [id])
+  device Device @relation(fields: [deviceId], references: [id])
+
+  @@index([elderId, ts])
+}
+
+model Alert {
+  id             String    @id @default(uuid())
+  elderId        String
+  type           String    // AlertType
+  severity       String    // AlertSeverity
+  status         String    @default("open") // AlertStatus
+  createdAt      DateTime  @default(now())
+  acknowledgedAt DateTime?
+  acknowledgedBy String?   // userId
+  resolvedAt     DateTime?
+  resolvedBy     String?   // userId
+  payload        Json
+
+  elder Elder @relation(fields: [elderId], references: [id])
+
+  @@index([elderId, createdAt])
+}
+
+model MedicationSchedule {
+  id         String    @id @default(uuid())
+  elderId    String
+  drugName   String
+  dose       String
+  timesOfDay String[]  // ["08:00", "20:00"]
+  startsOn   DateTime
+  endsOn     DateTime?
+
+  elder  Elder             @relation(fields: [elderId], references: [id])
+  events MedicationEvent[]
+}
+
+model MedicationEvent {
+  id          String    @id @default(uuid())
+  scheduleId  String
+  dueAt       DateTime
+  takenAt     DateTime?
+  confirmedBy String?   // userId
+  source      String?   // MedicationEventSource
+  status      String    @default("pending") // pending | taken | missed | skipped
+
+  schedule MedicationSchedule @relation(fields: [scheduleId], references: [id])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorUserId String
+  action      String
+  targetType  String
+  targetId    String
+  ts          DateTime @default(now())
+  payload     Json     @default("{}")
+
+  actor User @relation(fields: [actorUserId], references: [id])
+}
+
+model PushSubscription {
+  id             String   @id @default(uuid())
+  userId         String
+  endpoint       String
+  expirationTime BigInt?
+  p256dh         String
+  auth           String
+  createdAt      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, endpoint])
+}
