@@ -92,6 +92,7 @@ export default defineConfig({
       "/medications": "http://localhost:8080",
       "/push": "http://localhost:8080",
       "/audit": "http://localhost:8080",
+      "/demo": "http://localhost:8080",
       "/ws": {
         target: "ws://localhost:8080",
         ws: true,
