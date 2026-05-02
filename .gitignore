@@ -40,6 +40,9 @@ Thumbs.db
 # Claude Code worktree/agent state
 .claude/
 
+# Manual agent worktrees + main snapshot (round 3 isolation infra)
+.agents/
+
 # TypeScript
 *.tsbuildinfo
 
