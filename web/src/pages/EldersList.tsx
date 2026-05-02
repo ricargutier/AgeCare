@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useElders, useElderAlerts, useElder } from "../api/queries";
 import { AlertBadge } from "../components/AlertBadge";
 import { OnlineDot } from "../components/OnlineDot";
+import { DemoControls } from "../components/DemoControls";
 import type { Elder } from "../../../shared/contracts/types";
 
 function calcAge(dob: string): number {
@@ -149,6 +150,8 @@ export function EldersList() {
           {elders.length} elder{elders.length !== 1 ? "s" : ""} in your care circle
         </p>
       </div>
+
+      <DemoControls />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {elders.map((elder) => (

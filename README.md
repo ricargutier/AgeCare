@@ -93,30 +93,58 @@ node scripts/check-stack.mjs
 
 ---
 
-## Quick start
+## Quick start (verified working)
 
+```bash
+# 1. Prereqs: Node 20, pnpm 8+ (npm i -g pnpm), Docker Desktop running
+pnpm install
+
+# 2. Start Postgres
+docker compose up -d postgres
+
+# 3. Set backend port (3000 doesn't work on Windows — see Gotchas)
+echo "PORT=8080" >> backend/.env
+
+# 4. Migrate + seed
+pnpm db:migrate
+pnpm db:seed
+
+# 5. Start everything
+pnpm demo
+# (backend at :8080, web at :5173, mobile at :5174, simulator heartbeat)
+
+# 6. In another terminal — run the smoke test
+BACKEND_URL=http://localhost:8080 pnpm e2e
+# Expected: 8/8 steps passed in <1s
 ```
-pnpm demo:setup   # one-time: install deps, start DB, migrate, seed
-pnpm demo         # start backend + web + mobile + simulator heartbeat loop
-pnpm e2e          # in a second terminal — run the smoke test
+
+Then open **http://localhost:5173** and log in as `david@agecare.demo` / `agecare-demo-2026` (family_admin role).
+
+### Demo controls in the UI
+
+The Elders list page has a "Demo controls" panel (visible to family_admin and system_admin) with 6 buttons that fire each scenario via the backend's `/demo/scenarios/:name` endpoint. No need to switch terminals.
+
+### Or run all 6 scenarios from the CLI
+
+```bash
+BACKEND_HTTP_URL=http://localhost:8080 pnpm sim:all
 ```
 
-### What `demo:setup` does
+### Gotchas
 
-1. `pnpm install` — installs all workspace packages
-2. `docker-compose up -d postgres` — starts Postgres 16
-3. `node scripts/wait-for-postgres.mjs` — polls until port 5432 is ready
-4. `pnpm db:migrate` — runs Prisma migrations
-5. `pnpm db:seed` — seeds demo users, elder, devices, medications
+- **Port 3000 doesn't work on Windows.** Hyper-V/WSL reserves the 2990-3189 TCP range. Use 8080 (or any port outside the reserved ranges, see `netsh int ipv4 show excludedportrange protocol=tcp`).
+- **bcrypt → bcryptjs.** The `bcrypt` native binding fails to compile on Windows without the C++ build chain. We use `bcryptjs` (pure JS) instead. Slower but reliable.
+- **pnpm 10 build-script approval.** Postinstalls for Prisma + bcryptjs need explicit approval via `pnpm.onlyBuiltDependencies` in root `package.json` (already configured). If you see "missing native binding," run `pnpm rebuild`.
+- **First Postgres pull is slow** (~150 MB image).
+- **The `demo` script defaults to port 3000** for the backend; the `.env` change above overrides it. If you'd rather edit the script: change `package.json`'s `dev:backend` script to set `PORT=8080`.
 
 ### What `pnpm demo` does
 
-1. `docker-compose up -d postgres` — ensures Postgres is running
-2. Uses `concurrently` to start all four services in parallel:
-   - **[bk]** backend on `http://localhost:3000`
-   - **[web]** web portal on `http://localhost:5173`
-   - **[mob]** mobile PWA on `http://localhost:5174`
-   - **[sim]** simulator heartbeat loop
+Uses `concurrently` to start in parallel:
+- **[bk]** backend on `http://localhost:8080` (with `PORT=8080` in `backend/.env`)
+- **[web]** web portal on `http://localhost:5173`
+- **[mob]** mobile PWA on `http://localhost:5174`
+- **[sim]** simulator heartbeat loop publishing to `ws://localhost:8080/ws/ingest`
 
 ---
 

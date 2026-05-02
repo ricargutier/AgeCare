@@ -98,7 +98,7 @@ export function AdminPanel() {
                       {new Date(entry.ts).toLocaleString()}
                     </td>
                     <td style={{ fontFamily: "monospace", fontSize: 12 }}>
-                      {entry.actorUserId.slice(0, 12)}…
+                      {entry.actorUserId ? `${entry.actorUserId.slice(0, 12)}…` : <em style={{ color: "var(--text-secondary)" }}>system</em>}
                     </td>
                     <td style={{ fontWeight: 600 }}>{entry.action}</td>
                     <td style={{ textTransform: "capitalize" }}>{entry.targetType}</td>

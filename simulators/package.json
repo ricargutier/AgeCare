@@ -10,7 +10,8 @@
     "sim:vitals-anomaly": "tsx src/scenarios/vitals-anomaly.ts",
     "sim:inactivity": "tsx src/scenarios/inactivity.ts",
     "sim:medication-missed": "tsx src/scenarios/medication-missed.ts",
-    "sim:device-offline": "tsx src/scenarios/device-offline.ts"
+    "sim:device-offline": "tsx src/scenarios/device-offline.ts",
+    "sim:all": "tsx src/run-all.ts"
   },
   "dependencies": {
     "ws": "^8.17.0"

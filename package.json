@@ -25,6 +25,7 @@
     "sim:inactivity": "pnpm --filter @agecare/simulators sim:inactivity",
     "sim:medication-missed": "pnpm --filter @agecare/simulators sim:medication-missed",
     "sim:device-offline": "pnpm --filter @agecare/simulators sim:device-offline",
+    "sim:all": "pnpm --filter @agecare/simulators sim:all",
     "e2e": "node e2e/smoke.mjs",
     "typecheck": "pnpm -r run typecheck",
     "check-stack": "node scripts/check-stack.mjs",
