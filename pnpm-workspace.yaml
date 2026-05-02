@@ -1,0 +1,6 @@
+packages:
+  - "backend"
+  - "web"
+  - "mobile"
+  - "simulators"
+  # firmware/* are not pnpm packages — excluded intentionally

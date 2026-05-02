@@ -1,0 +1,46 @@
+{
+  "name": "agecare",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AgeCare — local-first elder-care monitoring prototype",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=8"
+  },
+  "scripts": {
+    "install:all": "pnpm install",
+    "db:up": "docker-compose up -d postgres",
+    "db:wait": "node scripts/wait-for-postgres.mjs",
+    "db:migrate": "pnpm --filter @agecare/backend db:migrate",
+    "db:seed": "pnpm --filter @agecare/backend db:seed",
+    "dev:backend": "pnpm --filter @agecare/backend dev",
+    "dev:web": "pnpm --filter @agecare/web dev",
+    "dev:mobile": "pnpm --filter @agecare/mobile dev",
+    "dev:sim": "pnpm --filter @agecare/simulators dev",
+    "demo": "pnpm db:up && concurrently -k -n bk,web,mob,sim --prefix-colors blue,green,magenta,yellow \"pnpm dev:backend\" \"pnpm dev:web\" \"pnpm dev:mobile\" \"pnpm dev:sim\"",
+    "demo:setup": "pnpm install && pnpm db:up && node scripts/wait-for-postgres.mjs && pnpm db:migrate && pnpm db:seed",
+    "sim:fall": "pnpm --filter @agecare/simulators sim:fall",
+    "sim:sos": "pnpm --filter @agecare/simulators sim:sos",
+    "sim:vitals-anomaly": "pnpm --filter @agecare/simulators sim:vitals-anomaly",
+    "sim:inactivity": "pnpm --filter @agecare/simulators sim:inactivity",
+    "sim:medication-missed": "pnpm --filter @agecare/simulators sim:medication-missed",
+    "sim:device-offline": "pnpm --filter @agecare/simulators sim:device-offline",
+    "e2e": "node e2e/smoke.mjs",
+    "typecheck": "pnpm -r run typecheck",
+    "check-stack": "node scripts/check-stack.mjs",
+    "seed-summary": "node scripts/seed-summary.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "pg": "^8.11.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "bcrypt",
+      "esbuild",
+      "prisma"
+    ]
+  }
+}
